@@ -24,7 +24,12 @@ if (!fs.existsSync(uploadsDir)) {
 app.use(cors());
 
 // Раздача статики из uploads
-app.use('/uploads', express.static(uploadsDir));
+app.use('/uploads', express.static(uploadsDir, {
+  setHeaders: (res, path) => {
+    res.set('Access-Control-Allow-Origin', '*');
+  }
+}));
+
 
 // Настройка multer для файлов
 const storage = multer.diskStorage({
@@ -92,7 +97,18 @@ app.put('/profile/:id', (req, res) => {
 
 // Создание кейса
 const uploadCaseFiles = upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'files', maxCount: 15 }]);
-app.post('/cases', uploadCaseFiles, (req, res) => {
+
+app.post('/cases', (req, res, next) => {
+  uploadCaseFiles(req, res, (err) => {
+    if (err) {
+      console.error('Ошибка Multer:', err);
+      return res.status(500).json({ error: 'Ошибка загрузки файлов' });
+    }
+    console.log('req.body:', req.body);
+    console.log('req.files:', req.files);
+    next();
+  });
+}, (req, res) => {
   const { userId, title, theme, description } = req.body;
   if (!userId || !title)
     return res.status(400).json({ error: 'userId и title обязательны' });
@@ -110,12 +126,13 @@ app.post('/cases', uploadCaseFiles, (req, res) => {
   );
   stmt.run(userId, title, theme || '', description || '', coverPath, JSON.stringify(filesPaths), 'open', function (err) {
     if (err) {
-      console.error(err);
+      console.error('Ошибка вставки в базу:', err);
       return res.status(500).json({ error: 'Ошибка при сохранении кейса' });
     }
     res.json({ id: this.lastID, message: 'Кейс успешно создан' });
   });
 });
+
 
 // Получение кейсов с фильтрацией
 app.get('/cases', (req, res) => {
@@ -352,4 +369,8 @@ app.post('/reviews', (req, res) => {
       res.json(rows);
     });
   });
+});
+
+app.get('/', (req, res) => {
+  res.send('Welcome to the API');
 });

@@ -143,18 +143,23 @@ export default function CasePage() {
                 <div className={styles.projectInfo}>
                   <div className={styles.projectPerformer}>
                     Заказчик:{' '}
-                    <Link to={`/profileview/${caseItem.userId}`}>
-                      {caseItem.userEmail || 'Не указан'}
-                    </Link>
+                    {/* Здесь убрали вложенный Link в Link: заменено на span с Link вне карточки */}
+                    <span>
+                      <Link to={`/profileview/${caseItem.userId}`}>
+                        {caseItem.userEmail || 'Не указан'}
+                      </Link>
+                    </span>
                   </div>
                   <div className={styles.projectTitle}>Название: {caseItem.title}</div>
                   <div className={styles.projectTopic}>Тема: {caseItem.theme || 'Не указана'}</div>
                   {caseItem.executorId && (
                     <div className={styles.projectPerformer}>
                       Исполнитель:{' '}
-                      <Link to={`/profileview/${caseItem.executorId}`}>
-                        {caseItem.executorEmail || 'Не указан'}
-                      </Link>
+                      <span>
+                        <Link to={`/profileview/${caseItem.executorId}`}>
+                          {caseItem.executorEmail || 'Не указан'}
+                        </Link>
+                      </span>
                     </div>
                   )}
                 </div>

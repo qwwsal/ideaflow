@@ -3,11 +3,11 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { FaStar } from 'react-icons/fa';
 import styles from './ProfileView.module.css';
 
-export default function ProfilePage() {
+export default function ProfileView() {
   const navigate = useNavigate();
   const { userId: paramUserId } = useParams();
 
-  const [userId, setUserId] = useState(paramUserId || localStorage.getItem('userId'));
+  const [userId, setUserId] = useState(paramUserId);
   const [userEmail, setUserEmail] = useState('');
   const [activeTab, setActiveTab] = useState('projects');
   const [formData, setFormData] = useState({
@@ -21,7 +21,8 @@ export default function ProfilePage() {
   const [error, setError] = useState('');
   const [projectsAsCustomer, setProjectsAsCustomer] = useState([]);
   const [completedExecutorProjects, setCompletedExecutorProjects] = useState([]);
-  
+  const [inProcessExecutorCases, setInProcessExecutorCases] = useState([]);
+
   const [reviews, setReviews] = useState([]);
   const [newReviewText, setNewReviewText] = useState('');
   const [newReviewRating, setNewReviewRating] = useState(0);
@@ -59,14 +60,28 @@ export default function ProfilePage() {
       }
     };
 
-    // Загрузка данных проектов и отзывов (упрощённо)
     const fetchProjectsAsCustomer = async () => {
       try {
         const resProjects = await fetch(`http://localhost:3001/projects?userId=${userId}`);
-        if (!resProjects.ok) throw new Error('Ошибка загрузки проектов');
-        const projectsData = await resProjects.json();
-        setProjectsAsCustomer(projectsData);
-      } catch {
+        if (!resProjects.ok) throw new Error('Ошибка загрузки проектов как заказчика');
+        const projectsDataRaw = await resProjects.json();
+        const projectsData = projectsDataRaw.filter(p => p.status === 'closed');
+
+        const resCases = await fetch(`http://localhost:3001/cases?userId=${userId}`);
+        if (!resCases.ok) throw new Error('Ошибка загрузки кейсов заказчика');
+        const casesDataRaw = await resCases.json();
+        const casesData = casesDataRaw.filter(c => c.status === 'open');
+
+        const combined = [...casesData, ...projectsData];
+        combined.sort((a, b) => {
+          if (a.status === 'open' && b.status !== 'open') return -1;
+          if (a.status !== 'open' && b.status === 'open') return 1;
+          return 0;
+        });
+
+        setProjectsAsCustomer(combined);
+      } catch (error) {
+        console.error('Ошибка при загрузке проектов и кейсов:', error);
         setProjectsAsCustomer([]);
       }
     };
@@ -76,9 +91,24 @@ export default function ProfilePage() {
         const res = await fetch(`http://localhost:3001/projects?executorEmail=${encodeURIComponent(userEmail)}`);
         if (!res.ok) throw new Error('Ошибка загрузки проектов исполнителя');
         const data = await res.json();
-        setCompletedExecutorProjects(data);
+        const closedProjects = data.filter(p => p.status === 'closed');
+        setCompletedExecutorProjects(closedProjects);
       } catch {
         setCompletedExecutorProjects([]);
+      }
+    };
+
+    const fetchInProcessExecutorCases = async () => {
+      try {
+        const res = await fetch(`http://localhost:3001/processed-cases`);
+        if (!res.ok) throw new Error('Ошибка загрузки принятых кейсов');
+        const data = await res.json();
+        const filtered = data.filter(
+          c => c.executorId === Number(userId) && c.status === 'in_process'
+        );
+        setInProcessExecutorCases(filtered);
+      } catch {
+        setInProcessExecutorCases([]);
       }
     };
 
@@ -88,12 +118,15 @@ export default function ProfilePage() {
         if (!response.ok) throw new Error('Ошибка загрузки отзывов');
         const data = await response.json();
         setReviews(data);
-      } catch {}
+      } catch (err) {
+        console.error(err);
+      }
     };
 
     fetchUserData().then(() => {
       fetchProjectsAsCustomer();
       fetchCompletedExecutorProjects();
+      fetchInProcessExecutorCases();
       fetchReviews();
     });
   }, [userId, userEmail, navigate]);
@@ -110,7 +143,7 @@ export default function ProfilePage() {
   const averageRating =
     reviews.length > 0 ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) : 0;
 
-// Новый handleAddReview с отправкой на сервер
+  // Новый handleAddReview с отправкой на сервер
   const handleAddReview = async () => {
     if (newReviewText.trim() === '' || newReviewRating === 0) return;
 
@@ -138,137 +171,145 @@ export default function ProfilePage() {
     }
   };
 
+  const formatReviewerPhoto = (photoPath) => {
+    if (!photoPath) return null;
+    // Если фото уже с сервера (начинается с /), добавим условно хост
+    if (photoPath.startsWith('http')) return photoPath;
+    if (photoPath.startsWith('/')) return `http://localhost:3001${photoPath}`;
+    return photoPath;
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'projects':
-              return (
-                <>
-                  <h3 className={styles.projectsTitle}>Проекты пользователя (заказчик)</h3>
-                  <div className={`${styles.tabContent} ${styles.projectsTab}`}>
-                    {projectsAsCustomer.map((p) => (
-                      <div key={p.id} className={styles.projectCard}>
-                        {p.status === 'open' ? (
-                          <Link to={`/cases/${p.id}`} className={styles.casesLink}>
-                            <img
-                              src={`http://localhost:3001${p.cover || ''}`}
-                              alt={`Фото исполнителя ${p.executorEmail || 'Не указан'}`}
-                              className={styles.projectImage}
-                            />
-                            <div className={styles.projectInfo}>
-                              <div className={styles.projectTopic}>{p.theme || p.title}</div>
-                              <div className={styles.projectTitle}>Название: {p.title}</div>
-                              <div className={styles.projectStatus}>Статус: {p.status || 'неизвестен'}</div>
-                            </div>
-                          </Link>
-                        ) : (
-                          <Link to={`/projects/${p.id}`} className={styles.projectLink}>
-                            <img
-                              src={`http://localhost:3001${p.cover || ''}`}
-                              alt={`Фото исполнителя ${p.executorEmail || 'Не указан'}`}
-                              className={styles.projectImage}
-                            />
-                            <div className={styles.projectInfo}>
-                              <div className={styles.projectPerformer}>
-                                Исполнитель: {p.executorEmail || 'Не указан'}
-                              </div>
-                              <div className={styles.projectTopic}>{p.theme || p.title}</div>
-                              <div className={styles.projectTitle}>Название: {p.title}</div>
-                              <div className={styles.projectStatus}>Статус: {p.status || 'неизвестен'}</div>
-                            </div>
-                          </Link>
-                        )}
+        return (
+          <>
+            <h3 className={styles.projectsTitle}>Проекты пользователя (заказчик)</h3>
+            <div className={`${styles.tabContent} ${styles.projectsTab}`}>
+              {projectsAsCustomer.map((p) => (
+                <div key={p.id} className={styles.projectCard}>
+                  {p.status === 'open' ? (
+                    <Link to={`/cases/${p.id}`} className={styles.casesLink}>
+                      <img
+                        src={`http://localhost:3001${p.cover || ''}`}
+                        alt={`Фото исполнителя ${p.executorEmail || 'Не указан'}`}
+                        className={styles.projectImage}
+                      />
+                      <div className={styles.projectInfo}>
+                        <div className={styles.projectTopic}>{p.theme || p.title}</div>
+                        <div className={styles.projectTitle}>Название: {p.title}</div>
+                        <div className={styles.projectStatus}>Статус: {p.status || 'неизвестен'}</div>
                       </div>
-                    ))}
-                  </div>
-                </>
-              );
-            case 'cases':
-              return (
-                <div className={`${styles.tabContent} ${styles.casesTab}`}>
-                  <h3>Завершённые проекты пользователя (исполнитель)</h3>
-                  {completedExecutorProjects.length === 0 ? (
-                    <p>Пока пусто</p>
+                    </Link>
                   ) : (
-                    <div className={styles.casesGrid}>
-                      {completedExecutorProjects.map(proj => (
-                        <div key={proj.id} className={styles.caseCard}>
-                          <Link to={`/projects/${proj.id}`} key={proj.id} className={styles.projCardLink}>
-                            <div className={styles.projectCard}>
-                              <img
-                                className={styles.projectImage}
-                                src={`http://localhost:3001${proj.cover || ''}`}
-                                alt={`Фото исполнителя ${proj.performerEmail}`}
-                              />
-                              <div className={styles.projectInfo}>
-                                <div className={styles.projectTopic}>{proj.theme || proj.title}</div>
-                                <div className={styles.projectTitle}>Название: {proj.title}</div>
-                                <div className={styles.projectStatus}>Статус: {proj.status || 'неизвестен'}</div>
-                              </div>
-                            </div>
-                          </Link>
+                    <Link to={`/projects/${p.id}`} className={styles.projectLink}>
+                      <img
+                        src={`http://localhost:3001${p.cover || ''}`}
+                        alt={`Фото исполнителя ${p.executorEmail || 'Не указан'}`}
+                        className={styles.projectImage}
+                      />
+                      <div className={styles.projectInfo}>
+                        <div className={styles.projectPerformer}>
+                          Исполнитель: {p.executorEmail || 'Не указан'}
                         </div>
-                      ))}
-                    </div>
+                        <div className={styles.projectTopic}>{p.theme || p.title}</div>
+                        <div className={styles.projectTitle}>Название: {p.title}</div>
+                        <div className={styles.projectStatus}>Статус: {p.status || 'неизвестен'}</div>
+                      </div>
+                    </Link>
                   )}
                 </div>
-              );
-      case 'reviews':
-              return (
-                <div className={styles.reviewContainer}>
-                  <h3>
-                    Отзывы пользователя{' '}
-                    <span style={{ fontFamily: 'Arial', fontWeight: 'normal', fontSize: '1rem', marginLeft: '10px' }}>
-                      ({averageRating} ★)
-                    </span>
-                  </h3>
-                  <div className={styles.reviewListCustom}>
-                    {reviews.length === 0 ? (
-                      <p>Пока нет отзывов</p>
-                    ) : (
-                      reviews.map((r) => (
-                        <div key={r.id} className={styles.reviewItemCustom}>
-                          <div className={styles.reviewPhotoCustom}>
-                            {r.reviewerPhoto ? (
-                              <img src={r.reviewerPhoto} alt={r.reviewerName} />
-                            ) : (
-                              <div className={styles.userPhotoPlaceholderCustom}></div>
-                            )}
-                          </div>
-                          <div>
-                            <b>{r.reviewerName}</b>
-                            <p>{r.text}</p>
-                            <div>{renderStars(r.rating)}</div>
-                          </div>
+              ))}
+            </div>
+          </>
+        );
+      case 'cases':
+        return (
+          <div className={`${styles.tabContent} ${styles.casesTab}`}>
+            <h3>Завершённые проекты пользователя (исполнитель)</h3>
+            {completedExecutorProjects.length === 0 ? (
+              <p>Пока пусто</p>
+            ) : (
+              <div className={styles.casesGrid}>
+                {completedExecutorProjects.map(proj => (
+                  <div key={proj.id} className={styles.caseCard}>
+                    <Link to={`/projects/${proj.id}`} key={proj.id} className={styles.projCardLink}>
+                      <div className={styles.projectCard}>
+                        <img
+                          className={styles.projectImage}
+                          src={`http://localhost:3001${proj.cover || ''}`}
+                          alt={`Фото исполнителя ${proj.performerEmail}`}
+                        />
+                        <div className={styles.projectInfo}>
+                          <div className={styles.projectTopic}>{proj.theme || proj.title}</div>
+                          <div className={styles.projectTitle}>Название: {proj.title}</div>
+                          <div className={styles.projectStatus}>Статус: {proj.status || 'неизвестен'}</div>
                         </div>
-                      ))
-                    )}
+                      </div>
+                    </Link>
                   </div>
-                  <div className={styles.reviewFormCustom}>
-                    <textarea
-                      placeholder="Оставьте отзыв..."
-                      value={newReviewText}
-                      onChange={(e) => setNewReviewText(e.target.value)}
-                    />
-                    <div className={styles.ratingStars}>
-                      {[...Array(5)].map((_, index) => {
-                        const starValue = index + 1;
-                        return (
-                          <FaStar
-                            key={index}
-                            size={24}
-                            style={{ cursor: 'pointer' }}
-                            color={starValue <= (hoverRating || newReviewRating) ? '#ffbe5a' : '#ccc'}
-                            onClick={() => setNewReviewRating(starValue)}
-                            onMouseEnter={() => setHoverRating(starValue)}
-                            onMouseLeave={() => setHoverRating(0)}
-                          />
-                        );
-                      })}
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      case 'reviews':
+        return (
+          <div className={styles.reviewContainer}>
+            <h3>
+              Отзывы пользователя{' '}
+              <span style={{ fontFamily: 'Arial', fontWeight: 'normal', fontSize: '1rem', marginLeft: '10px' }}>
+                ({averageRating} ★)
+              </span>
+            </h3>
+            <div className={styles.reviewListCustom}>
+              {reviews.length === 0 ? (
+                <p>Пока нет отзывов</p>
+              ) : (
+                reviews.map((r) => (
+                  <div key={r.id} className={styles.reviewItemCustom}>
+                    <div className={styles.reviewPhotoCustom}>
+                      {r.reviewerPhoto ? (
+                        <img src={formatReviewerPhoto(r.reviewerPhoto)} alt={r.reviewerName} />
+                      ) : (
+                        <div className={styles.userPhotoPlaceholderCustom}></div>
+                      )}
                     </div>
-                    <button onClick={handleAddReview}>Добавить отзыв</button>
+                    <div>
+                      <b>{r.reviewerName}</b>
+                      <p>{r.text}</p>
+                      <div>{renderStars(r.rating)}</div>
+                    </div>
                   </div>
-                </div>
-              );
+                ))
+              )}
+            </div>
+            <div className={styles.reviewFormCustom}>
+              <textarea
+                placeholder="Оставьте отзыв..."
+                value={newReviewText}
+                onChange={(e) => setNewReviewText(e.target.value)}
+              />
+              <div className={styles.ratingStars}>
+                {[...Array(5)].map((_, index) => {
+                  const starValue = index + 1;
+                  return (
+                    <FaStar
+                      key={index}
+                      size={24}
+                      style={{ cursor: 'pointer' }}
+                      color={starValue <= (hoverRating || newReviewRating) ? '#ffbe5a' : '#ccc'}
+                      onClick={() => setNewReviewRating(starValue)}
+                      onMouseEnter={() => setHoverRating(starValue)}
+                      onMouseLeave={() => setHoverRating(0)}
+                    />
+                  );
+                })}
+              </div>
+              <button onClick={handleAddReview}>Добавить отзыв</button>
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -279,7 +320,7 @@ export default function ProfilePage() {
 
   return (
     <>
-<header className={styles.header}>
+      <header className={styles.header}>
         <Link to="/">
           <img src="/images/logosmall.svg" alt="IdeaFlow logo" style={{ height: 80 }} />
         </Link>

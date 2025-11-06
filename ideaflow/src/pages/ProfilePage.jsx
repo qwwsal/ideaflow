@@ -467,7 +467,14 @@ export default function ProfilePage() {
   };
 
   if (loading) return <p>Загрузка данных пользователя...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  
+  if (error) {
+    // Показать ошибку и сразу перейти на вход
+    setTimeout(() => {
+      navigate('/signin');
+    }, 1500);
+    return <p style={{ color: 'red' }}>{error}</p>;
+  }
 
   return (
     <>

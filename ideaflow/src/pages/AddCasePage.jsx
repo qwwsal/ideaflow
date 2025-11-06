@@ -12,14 +12,14 @@ export default function AddCasePage() {
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
-  const selectedFiles = Array.from(e.target.files);
-  if (selectedFiles.length > 15) {
-    alert('Можно выбрать не более 15 файлов');
-    e.target.value = ''; // сброс выбора в input
-    return;
-  }
-  setFiles(selectedFiles);
-};
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length > 15) {
+      alert('Можно выбрать не более 15 файлов');
+      e.target.value = ''; // сброс выбора в input
+      return;
+    }
+    setFiles(selectedFiles);
+  };
 
   const handleCoverChange = (e) => {
     if (e.target.files.length > 0) {
