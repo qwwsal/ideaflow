@@ -11,6 +11,7 @@ import AddCasePage from './pages/AddCasePage';
 import PageFullCase from './pages/PageFullCase';
 import PageFullProject from './pages/PageFullProject';
 import ProfileView from './pages/ProfileView';
+import PageFullProcessedCase from './pages/PageFullProcessedCase';
 
 
 function ProtectedRoute({ children }) {
@@ -30,6 +31,7 @@ export default function App() {
       <Route path="/projects/:id" element={<PageFullProject />} />
       <Route path="/cases" element={<CasePage />} />
       <Route path="/cases/:id" element={<PageFullCase />} />
+      <Route path="/processed-cases/:id" element={<PageFullProcessedCase />} />
 
       {/* Страницы для входа и регистрации */}
       <Route path="/signin" element={<SignInPage />} />

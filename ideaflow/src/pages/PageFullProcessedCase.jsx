@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import styles from './PageFullCase.module.css';
+import styles from './PageFullProcessedCase.module.css';
 
-export default function PageFullCase() {
+export default function PageFullProcessedCase() {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -11,8 +11,6 @@ export default function PageFullCase() {
   const [error, setError] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const userId = localStorage.getItem('currentUserId');
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -20,7 +18,8 @@ export default function PageFullCase() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:3001/cases/${id}`)
+    
+    fetch(`http://localhost:3001/processed-cases/${id}`)
       .then(res => {
         if (!res.ok) {
           throw new Error(`Ошибка загрузки кейса: ${res.status} ${res.statusText}`);
@@ -39,44 +38,9 @@ export default function PageFullCase() {
       });
   }, [id]);
 
-  const acceptCase = () => {
-    if (!userId) {
-      alert('Вы должны войти в систему чтобы принять кейс');
-      navigate('/signin');
-      return;
-    }
-    fetch(`http://localhost:3001/cases/${id}/accept`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ executorId: parseInt(userId, 10) }),
-    })
-      .then(async res => {
-        if (!res.ok) {
-          const text = await res.text();
-          console.error('Ошибка ответа сервера при принятии кейса:', text);
-          throw new Error(text || 'Ошибка обновления статуса');
-        }
-        return res.json();
-      })
-      .then(data => {
-        alert('Кейс принят');
-        setCaseData(prev => ({
-          ...prev,
-          status: 'in_process',
-          executorId: parseInt(userId, 10),
-          executorEmail: prev.executorEmail || 'Вы',
-        }));
-        console.log('Ответ сервера accept:', data);
-      })
-      .catch(err => {
-        console.error('Ошибка при принятии кейса:', err);
-        alert('Ошибка обновления статуса: ' + err.message);
-      });
-  };
-
-  if (loading) return <p>Загрузка кейса...</p>;
+  if (loading) return <p>Загрузка проекта...</p>;
   if (error) return <p>Ошибка: {error}</p>;
-  if (!caseData) return <p>Кейс не найден</p>;
+  if (!caseData) return <p>Проект не найден</p>;
 
   return (
     <>
@@ -131,7 +95,14 @@ export default function PageFullCase() {
 
       <main className={styles.container}>
         <h1 className={styles.title}>{caseData.title}</h1>
-        {caseData.cover && <img src={`http://localhost:3001${caseData.cover}`} alt="Обложка" className={styles.cover} />}
+        
+        {caseData.cover && (
+          <img 
+            src={`http://localhost:3001${caseData.cover}`} 
+            alt="Обложка" 
+            className={styles.cover} 
+          />
+        )}
         
         <div className={styles.infoSection}>
           <p><b>Заказчик:</b> 
@@ -143,8 +114,26 @@ export default function PageFullCase() {
               caseData.userEmail
             )}
           </p>
-          <p><b>Исполнитель:</b> {caseData.executorEmail || 'Не назначен'}</p>
+
+          <p><b>Исполнитель:</b> 
+            {caseData.executorId ? (
+              <Link to={`/profileview/${caseData.executorId}`}>
+                {caseData.executorEmail || 'Вы'}
+              </Link>
+            ) : (
+              caseData.executorEmail || 'Не назначен'
+            )}
+          </p>
+
           <p><b>Тема:</b> {caseData.theme}</p>
+
+          <p><b>Статус:</b> 
+            <span className={`${styles.status} ${styles[caseData.status]}`}>
+              {caseData.status === 'in_process' ? 'В процессе' : 
+               caseData.status === 'closed' ? 'Завершен' : caseData.status}
+            </span>
+          </p>
+
           <p><b>Задача проекта:</b> {caseData.description}</p>
 
           <div className={styles.filesSection}>
@@ -152,8 +141,14 @@ export default function PageFullCase() {
             <div className={styles.filesList}>
               {caseData.files && caseData.files.length > 0 ? (
                 caseData.files.map((file, i) => (
-                  <a key={i} href={`http://localhost:3001${file}`} target="_blank" rel="noreferrer" className={styles.fileItem}>
-                    {file.split('/').pop()}
+                  <a 
+                    key={i} 
+                    href={`http://localhost:3001${file}`} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className={styles.fileItem}
+                  >
+                    📎 {file.split('/').pop()}
                   </a>
                 ))
               ) : (
@@ -161,12 +156,15 @@ export default function PageFullCase() {
               )}
             </div>
           </div>
+        </div>
 
-          {caseData.status === 'open' && (
-            <button className={styles.acceptButton} onClick={acceptCase}>Принять кейс</button>
-          )}
-
-          <p><b>Статус:</b> {caseData.status}</p>
+        <div className={styles.actionButtons}>
+          <button 
+            className={styles.backButton} 
+            onClick={() => navigate(-1)}
+          >
+            ← Назад
+          </button>
         </div>
       </main>
 

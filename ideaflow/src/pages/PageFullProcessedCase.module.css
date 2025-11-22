@@ -1,4 +1,4 @@
-/* PageFullCase.module.css */
+/* PageFullProcessedCase.module.css */
 body {
   background-color: #0E900E;
   margin: 0;
@@ -13,14 +13,6 @@ body {
   align-items: center;
   justify-content: space-between;
   position: relative;
-}
-
-.logo {
-  font-weight: bold;
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 /* Бургер меню */
@@ -98,6 +90,7 @@ body {
   margin-bottom: 15px;
   color: #2f7a2f;
   text-align: center;
+  font-family: 'Malik Trial';
 }
 
 .cover {
@@ -167,23 +160,47 @@ body {
   transform: translateY(-2px);
 }
 
-.acceptButton {
-  margin-top: 25px;
-  background-color: #fbbb13;
-  padding: 15px 30px;
-  border: none;
-  border-radius: 15px;
-  color: #0e490e;
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 18px;
-  font-family: 'Malik Trial';
-  width: 100%;
-  transition: all 0.3s ease;
+.status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-left: 10px;
 }
 
-.acceptButton:hover {
-  background-color: #daa214;
+.status.in_process {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.closed {
+  background: #d1edff;
+  color: #0E900E;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.backButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Malik Trial';
+  font-weight: 600;
+}
+
+.backButton:hover {
+  background: #5a6268;
   transform: translateY(-2px);
 }
 
@@ -242,10 +259,10 @@ body {
   width: 30px;
 }
 
-/* Мобильные стили */
+/* Мобильная адаптация */
 @media (max-width: 768px) {
   .header {
-   padding: 30px 20px 10px 20px;
+    padding: 30px 20px 10px 20px;
   }
 
   .burgerMenu {
@@ -296,11 +313,6 @@ body {
 
   .infoSection {
     padding: 20px;
-  }
-
-  .acceptButton {
-    padding: 12px 20px;
-    font-size: 16px;
   }
 
   .footerContainer {

@@ -6,32 +6,30 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState('done');
   const [doneProjects, setDoneProjects] = useState([]);
   const [openProjects, setOpenProjects] = useState([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   
   const userId = localStorage.getItem('currentUserId');
 
   useEffect(() => {
-  // Загрузить завершенные проекты
-  fetch('http://localhost:3001/projects')
-    .then(res => res.json())
-    .then(data => {
-      const closedProjects = data.filter(p => p.status === 'closed');
-      // Берём последние 3 записи
-      setDoneProjects(closedProjects.slice(-3));
-    })
-    .catch(() => setDoneProjects([]));
+    // Загрузить завершенные проекты
+    fetch('http://localhost:3001/projects')
+      .then(res => res.json())
+      .then(data => {
+        const closedProjects = data.filter(p => p.status === 'closed');
+        setDoneProjects(closedProjects.slice(-3));
+      })
+      .catch(() => setDoneProjects([]));
 
-  // Загрузить открытые кейсы
-  fetch('http://localhost:3001/cases')
-    .then(res => res.json())
-    .then(data => {
-      const openCases = data.filter(c => c.status === 'open');
-      // Берём последние 3 записи
-      setOpenProjects(openCases.slice(-3));
-    })
-    .catch(() => setOpenProjects([]));
-}, []);
-
+    // Загрузить открытые кейсы
+    fetch('http://localhost:3001/cases')
+      .then(res => res.json())
+      .then(data => {
+        const openCases = data.filter(c => c.status === 'open');
+        setOpenProjects(openCases.slice(-3));
+      })
+      .catch(() => setOpenProjects([]));
+  }, []);
 
   const projectList = activeTab === 'done' ? doneProjects : openProjects;
 
@@ -45,13 +43,25 @@ export default function HomePage() {
     }
   };
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
     <>
       <header className={styles.header}>
         <Link to="/">
           <img src="/images/logosmall.svg" alt="IdeaFlow logo" style={{ height: 80 }} />
         </Link>
-        <nav className={styles.navLinks}>
+        
+        {/* Бургер меню */}
+        <div className={styles.burgerMenu} onClick={toggleMenu}>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <nav className={`${styles.navLinks} ${isMenuOpen ? styles.navLinksActive : ''}`}>
           <Link to={userId ? "/profile" : "/signin"}>Профиль</Link>
           <Link to="/cases">Кейсы</Link>
           <Link to="/projects">Проекты</Link>
@@ -61,7 +71,31 @@ export default function HomePage() {
           <Link to="/cases">
             <button className={styles.buttonYellow}>Приступить к проекту</button>
           </Link>
+          
+          {/* Элементы из футера в мобильном меню */}
+          <div className={styles.mobileFooterMenu}>
+            <div className={styles.footerContacts}>
+              Связаться с нами <br />
+              <a href="mailto:support@ideaflow.com">support@ideaflow.com</a>
+              <br />
+              <p>+7 (123) 456-78-90</p>
+            </div>
+            <div className={styles.footerSocials}>
+              <a href="#">
+                <img src="/images/facebook.svg" alt="Facebook" />
+              </a>
+              <a href="#">
+                <img src="/images/twitterx.svg" alt="Twitter" />
+              </a>
+              <a href="#">
+                <img src="/images/instagram.svg" alt="Instagram" />
+              </a>
+            </div>
+          </div>
         </nav>
+
+        {/* Оверлей для закрытия меню */}
+        {isMenuOpen && <div className={styles.overlay} onClick={toggleMenu}></div>}
       </header>
 
       <section className={styles.sectionIntro}>
@@ -82,25 +116,14 @@ export default function HomePage() {
         >
           <div className={styles.tabs} style={{ width: '100%' }}>
             <button
-              className={`${styles.tabButton} ${styles.left}`}
+              className={`${styles.tabButton} ${activeTab === 'done' ? styles.tabButtonActive : ''}`}
               onClick={() => setActiveTab('done')}
-              style={{
-                backgroundColor: activeTab === 'done' ? '#F5F5F5' : '#0E900E',
-                color: activeTab === 'done' ? '#0E900E' : '#F5F5F5',
-                borderRadius: '20px 20px 0 0',
-              }}
             >
               Реализованные идеи
             </button>
             <button
-              className={`${styles.tabButton} ${styles.right}`}
+              className={`${styles.tabButton} ${activeTab === 'open' ? styles.tabButtonActive : ''}`}
               onClick={() => setActiveTab('open')}
-              style={{
-                backgroundColor: activeTab === 'open' ? '#F5F5F5' : '#0E900E',
-                color: activeTab === 'open' ? '#0E900E' : '#F5F5F5',
-                borderRadius: '20px 20px 0 0',
-                borderLeft: 'none',
-              }}
             >
               Открытые проекты
             </button>
@@ -111,13 +134,13 @@ export default function HomePage() {
           </p>
 
           <div className={styles.projectsGrid}>
-            {projectList.map(({ id, userEmail, performerEmail, theme, cover, title }) => (
+            {projectList.map(({ id, userEmail, executorEmail, theme, cover, title }) => (
               activeTab === 'done' ? (
                 <Link key={id} to={`/projects/${id}`} className={styles.projectCardLink}>
                   <div className={styles.projectCard}>
-                    {cover && <img src={`http://localhost:3001${cover}`} alt={`Фото исполнителя ${performerEmail}`} />}
+                    {cover && <img src={`http://localhost:3001${cover}`} alt={`Фото исполнителя ${executorEmail}`} />}
                     <div style={{ padding: '8px' }}>
-                      <span>{performerEmail}</span><br />
+                      <span>{executorEmail}</span><br />
                       <span>{theme || title}</span>
                     </div>
                   </div>

@@ -3,15 +3,18 @@
 body {
   background-color: #0E900E;
   font-family: 'Malik Trial';
+  margin: 0;
+  padding: 0;
 }
 
 .header {
   background-color: #0E900E;
-  padding: 10px 126px;
+  padding: 10px 10%;
   color: #F5F5F5;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
 }
 
 .logo {
@@ -22,26 +25,63 @@ body {
   gap: 6px;
 }
 
+/* Бургер меню */
+.burgerMenu {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  padding: 5px;
+  z-index: 1001;
+}
+
+.burgerMenu span {
+  width: 25px;
+  height: 3px;
+  background-color: #F5F5F5;
+  margin: 3px 0;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+
 .navLinks {
   display: flex;
   align-items: center;
-  gap: 60px;
+  gap: 30px;
 }
 
 .navLinks a {
   color: #F5F5F5;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .buttonYellow {
   font-family: 'Malik Trial';
-  color:#0E900E;
+  color: #0E900E;
   background-color: #FBBB13;
   border: none;
   border-radius: 12px;
   padding: 6px 14px;
   cursor: pointer;
   font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Оверлей */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+/* Мобильное меню из футера */
+.mobileFooterMenu {
+  display: none;
 }
 
 .innerContainer {
@@ -71,12 +111,12 @@ form label {
 label p {
   margin-bottom: 10px;
 }
+
 p {
   font-family: 'Geoform';
 }
 
 /* Классы для текстового инпута и текстовой области*/
-
 .textInput {
   width: 100%;
   padding: 12px 15px;
@@ -86,7 +126,7 @@ p {
   border-radius: 12px;
   box-sizing: border-box;
   outline: none;
-    font-family: 'Geoform';
+  font-family: 'Geoform';
 }
 
 .textareaInput {
@@ -107,24 +147,42 @@ p {
   display: none;
 }
 
+/* Контейнер для кнопок файлов */
+.fileButtonsContainer {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
 /* Класс для кнопок "Прикрепить файл" и "Выбрать обложку" */
 .labelFileButton {
   display: inline-block;
   background-color: #0E900E;
   font-size: 18px;
   font-weight: 700;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-radius: 12px;
   cursor: pointer;
-  margin: 0px 30px 0px 0px;
   user-select: none;
   transition: background-color 0.3s ease;
   color: #FBBB13;
-    font-family: 'Geoform';
+  font-family: 'Geoform';
+  text-align: center;
+  flex: 1;
+  min-width: 200px;
 }
 
 .labelFileButton:hover {
   background-color: #1f531f;
+}
+
+.fileInfo {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #e8f5e8;
+  border-radius: 8px;
+  border-left: 4px solid #0E900E;
 }
 
 .fileList {
@@ -146,6 +204,26 @@ p {
   white-space: nowrap;
   text-overflow: ellipsis;
   line-height: 1.2;
+}
+
+.submitButton {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  background-color: #0E900E;
+  color: #FBBB13;
+  border: none;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: 'Malik Trial';
+  margin-top: 30px;
+}
+
+.submitButton:hover {
+  background-color: #1f531f;
 }
 
 .footer {
@@ -173,6 +251,12 @@ p {
   color: #FBBB13;
 }
 
+.footerLogo img {
+  width: clamp(80px, 18vw, 220px);
+  height: auto;
+  max-width: 100%;
+}
+
 .footerContacts {
   font-size: 20px;
 }
@@ -197,3 +281,141 @@ p {
   width: 30px;
 }
 
+/* Мобильные стили */
+@media (max-width: 768px) {
+  .header {
+    padding: 30px 20px 10px 20px;
+  }
+
+  .burgerMenu {
+    display: flex;
+  }
+
+  .navLinks {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    background-color: #0E900E;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 80px 30px 30px;
+    gap: 25px;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  .navLinksActive {
+    right: 0;
+  }
+
+  .overlay {
+    display: block;
+  }
+
+  .mobileFooterMenu {
+    display: block;
+    margin-top: 30px;
+    width: 100%;
+    border-top: 1px solid #F5F5F5;
+    padding-top: 20px;
+  }
+
+  .innerContainer {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .fileButtonsContainer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .labelFileButton {
+    min-width: auto;
+    width: 80%;
+    font-size: 16px;
+    padding: 10px 15px;
+    margin: 0 auto;
+  }
+
+  .footerContainer {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .footerLogo img {
+    width: clamp(70px, 22vw, 120px);
+  }
+}
+
+@media (max-width: 480px) {
+  .innerContainer {
+    margin: 15px;
+    padding: 15px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  form label {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .textInput,
+  .textareaInput {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .textareaInput {
+    height: 120px;
+  }
+
+  .submitButton {
+    font-size: 18px;
+    padding: 12px;
+  }
+
+  .footerContacts {
+    font-size: 16px;
+  }
+
+  .footerSocials img {
+    width: 25px;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 360px) {
+  .innerContainer {
+    margin: 10px;
+    padding: 12px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  .labelFileButton {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .footerLogo img {
+    width: 240px;
+  }
+}

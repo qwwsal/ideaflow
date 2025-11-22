@@ -8,6 +8,7 @@ export default function AddCasePage() {
   const [description, setDescription] = useState('');
   const [files, setFiles] = useState([]);
   const [cover, setCover] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -65,13 +66,25 @@ export default function AddCasePage() {
     }
   };
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
     <>
       <header className={styles.header}>
         <Link to="/">
           <img src="/images/logosmall.svg" alt="IdeaFlow logo" style={{ height: 80 }} />
         </Link>
-        <nav className={styles.navLinks}>
+        
+        {/* Бургер меню */}
+        <div className={styles.burgerMenu} onClick={toggleMenu}>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <nav className={`${styles.navLinks} ${isMenuOpen ? styles.navLinksActive : ''}`}>
           <Link to="/profile">Профиль</Link>
           <Link to="/cases">Кейсы</Link>
           <Link to="/projects">Проекты</Link>
@@ -81,7 +94,31 @@ export default function AddCasePage() {
           <Link to="/cases">
             <button className={styles.buttonYellow}>Приступить к проекту</button>
           </Link>
+          
+          {/* Элементы из футера в мобильном меню */}
+          <div className={styles.mobileFooterMenu}>
+            <div className={styles.footerContacts}>
+              Связаться с нами <br />
+              <a href="mailto:support@ideaflow.com">support@ideaflow.com</a>
+              <br />
+              <p>+7 (123) 456-78-90</p>
+            </div>
+            <div className={styles.footerSocials}>
+              <a href="#">
+                <img src="/images/facebook.svg" alt="Facebook" />
+              </a>
+              <a href="#">
+                <img src="/images/twitterx.svg" alt="Twitter" />
+              </a>
+              <a href="#">
+                <img src="/images/instagram.svg" alt="Instagram" />
+              </a>
+            </div>
+          </div>
         </nav>
+
+        {/* Оверлей для закрытия меню */}
+        {isMenuOpen && <div className={styles.overlay} onClick={toggleMenu}></div>}
       </header>
 
       <div className={styles.innerContainer}>
@@ -117,33 +154,36 @@ export default function AddCasePage() {
             />
           </label>
 
-          {/* Кнопка для выбора файлов */}
-          <label htmlFor="attachFiles" className={styles.labelFileButton}>
-            Прикрепить файлы (до 15)
-          </label>
-          <input
-            type="file"
-            id="attachFiles"
-            multiple
-            onChange={handleFileChange}
-            className={styles.fileInputHidden}
-          />
-          {files.length > 0 && (
-            <p>Выбрано файлов: {files.length}</p>
-          )}
+          <div className={styles.fileButtonsContainer}>
+            {/* Кнопка для выбора файлов */}
+            <label htmlFor="attachFiles" className={styles.labelFileButton}>
+              Прикрепить файлы (до 15)
+            </label>
+            <input
+              type="file"
+              id="attachFiles"
+              multiple
+              onChange={handleFileChange}
+              className={styles.fileInputHidden}
+            />
+            
+            {/* Кнопка для выбора обложки */}
+            <label htmlFor="selectCover" className={styles.labelFileButton}>
+              Выбрать обложку
+            </label>
+            <input
+              type="file"
+              id="selectCover"
+              onChange={handleCoverChange}
+              className={styles.fileInputHidden}
+            />
+          </div>
 
-          {/* Кнопка для выбора обложки */}
-          <label htmlFor="selectCover" className={styles.labelFileButton}>
-            Выбрать обложку
-          </label>
-          <input
-            type="file"
-            id="selectCover"
-            onChange={handleCoverChange}
-            className={styles.fileInputHidden}
-          />
+          {files.length > 0 && (
+            <p className={styles.fileInfo}>Выбрано файлов: {files.length}</p>
+          )}
           {cover && (
-            <p>Выбрана обложка: {cover.name}</p>
+            <p className={styles.fileInfo}>Выбрана обложка: {cover.name}</p>
           )}
 
           <button type="submit" className={styles.submitButton}>

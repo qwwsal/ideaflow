@@ -1,23 +1,27 @@
+/* ProjectsPage.module.css */
 body {
   margin: 0;
   font-family: 'Malik Trial';
   background: #0E900E;
 }
-button{
-    font-family: 'Malik Trial';
+
+button {
+  font-family: 'Malik Trial';
 }
-input{
-    font-family: 'Malik Trial';
+
+input {
+  font-family: 'Malik Trial';
 }
 
 /* Header */
 .header {
   background-color: #0E900E;
-  padding: 10px 126px;
+  padding: 10px 10%;
   color: #F5F5F5;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
 }
 
 .logo {
@@ -28,33 +32,70 @@ input{
   gap: 6px;
 }
 
+/* Бургер меню */
+.burgerMenu {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  padding: 5px;
+  z-index: 1001;
+}
+
+.burgerMenu span {
+  width: 25px;
+  height: 3px;
+  background-color: #F5F5F5;
+  margin: 3px 0;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+
 .navLinks {
   display: flex;
   align-items: center;
-  gap: 60px;
+  gap: 30px;
 }
 
 .navLinks a {
   color: #F5F5F5;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .buttonYellow {
   font-family: 'Malik Trial';
-  color:#0E900E;
+  color: #0E900E;
   background-color: #FBBB13;
   border: none;
   border-radius: 12px;
   padding: 6px 14px;
   cursor: pointer;
   font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Оверлей */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+/* Мобильное меню из футера */
+.mobileFooterMenu {
+  display: none;
 }
 
 /* Main Content */
 .projectsMain {
   background: #fff;
-  border-radius: 24px 24px 0 0;
-  padding: 32px 64px 48px 64px;
+  border-radius: 24px;
+  padding: 32px 40px 48px 40px;
   min-height: 700px;
 }
 
@@ -88,8 +129,9 @@ input{
   padding: 14px 32px;
   cursor: pointer;
 }
-.projectsFilter img{
-    width: 30px;
+
+.projectsFilter img {
+  width: 30px;
 }
 
 .modalOverlay {
@@ -110,6 +152,18 @@ input{
   padding: 20px;
   box-shadow: 2px 0 8px rgba(0,0,0,0.2);
   overflow-y: auto;
+  position: relative;
+}
+
+.closeFilter {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #0E900E;
 }
 
 .filterSidebar ul {
@@ -118,7 +172,7 @@ input{
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px; /* Отступы между элементами списка */
+  gap: 5px;
 }
 
 .filterSidebar li button {
@@ -130,22 +184,19 @@ input{
   padding: 6px 14px;
   cursor: pointer;
   font-weight: 600;
-  align-self: center; /* Центрируем кнопку по горизонтали */
-  margin-top: 20px; /* Отступ сверху от элементов списка */
+  align-self: center;
+  margin-top: 20px;
 }
 
 .filterSidebar input[type="checkbox"] {
-  accent-color: #FBBB13; /* жёлтый цвет */
+  accent-color: #FBBB13;
 }
-
 
 .projectsSearchWrapper {
   display: flex;
   align-items: center;
   background: #FBBB13;
   border-radius: 8px;
-  padding-right: 12px;
-  margin-left: 4px;
   width: 100%;
 }
 
@@ -162,27 +213,8 @@ input{
 
 .projectsSearch::placeholder {
   color: #0E900E;
-  opacity: 1; /* Для Firefox, чтобы цвет был насыщенным */
-}
-
-.projectsSearch::-webkit-input-placeholder {
-  color: #0E900E;
-}
-
-.projectsSearch::-moz-placeholder {
-  color: #0E900E;
   opacity: 1;
 }
-
-.projectsSearch:-ms-input-placeholder {
-  color: #0E900E;
-}
-
-.projectsSearch:-moz-placeholder {
-  color: #0E900E;
-  opacity: 1;
-}
-
 
 .projectsSearchBtn {
   background: none;
@@ -191,8 +223,9 @@ input{
   padding: 0 7px 0 0;
 }
 
-.projectsSearchBtn img{
-    width: 25px;
+.projectsSearchBtn img {
+  width: 25px;
+  padding: 10px;
 }
 
 .projectsRecommendation {
@@ -211,7 +244,7 @@ input{
   margin-bottom: 40px;
 }
 
-.projectsGrid a{
+.projectsGrid a {
   text-decoration: none;
 }
 
@@ -223,18 +256,21 @@ input{
   padding: 0;
   border-radius: 20px;
   overflow: hidden;
-  height: auto;
+  height: 380px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.12);
 }
 
 .projectCard:hover {
   transform: translateY(-5px);
+  box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .projectImage {
   width: 100%;
   height: 200px;
   object-fit: cover;
-    border-radius: 20px;
+  border-radius: 20px;
 }
 
 .projectInfo {
@@ -275,6 +311,12 @@ input{
   color: #FBBB13;
 }
 
+.footerLogo img {
+  width: clamp(80px, 18vw, 220px);
+  height: auto;
+  max-width: 100%;
+}
+
 .footerContacts {
   font-size: 20px;
 }
@@ -295,6 +337,190 @@ input{
   gap: 20px;
 }
 
-.footerSocials img{
+.footerSocials img {
   width: 30px;
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
+  .header {
+    padding: 30px 20px 10px 20px;
+  }
+
+  .burgerMenu {
+    display: flex;
+  }
+.projectCard {
+  height: fit-content;
+}
+  .navLinks {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    background-color: #0E900E;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 80px 30px 30px;
+    gap: 25px;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  .navLinksActive {
+    right: 0;
+  }
+
+  .overlay {
+    display: block;
+  }
+
+  .mobileFooterMenu {
+    display: block;
+    margin-top: 30px;
+    width: 100%;
+    border-top: 1px solid #F5F5F5;
+    padding-top: 20px;
+  }
+
+  .projectsMain {
+    border-radius: 20px;
+  }
+
+  .projectsTitle {
+    font-size: 28px;
+    margin-bottom: 15px;
+  }
+
+  .projectsControls {
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .projectsFilter {
+    width: 100%;
+    justify-content: center;
+    font-size: 18px;
+    padding: 12px 20px;
+  }
+
+  .projectsSearchWrapper {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .projectsSearch {
+    font-size: 16px;
+    padding: 12px;
+  }
+
+  .projectsRecommendation {
+    font-size: 18px;
+    margin: 12px 0 15px 0;
+  }
+
+  .projectsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .projectImage {
+    height: 180px;
+  }
+
+  .projectInfo {
+    padding: 8px 12px 12px 12px;
+  }
+
+  .projectPerformer, .projectTopic, .projectTitle {
+    font-size: 16px;
+  }
+
+  .footerContainer {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .footerLogo img {
+    width: clamp(70px, 22vw, 120px);
+  }
+
+  .footerContacts {
+    font-size: 16px;
+  }
+
+  .filterSidebar {
+    width: 100%;
+    max-width: 300px;
+    height: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .projectsMain {
+    border-radius: 20px;
+  }
+
+  .projectsTitle {
+    font-size: 24px;
+  }
+  .projectCard {
+  height: fit-content;
+}
+
+  .projectsFilter {
+    font-size: 16px;
+    padding: 10px 15px;
+  }
+
+  .projectsSearch {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .projectsRecommendation {
+    font-size: 16px;
+  }
+
+  .projectImage {
+    height: 160px;
+  }
+
+  .projectInfo {
+    font-size: 14px;
+  }
+
+  .footerContacts {
+    font-size: 14px;
+  }
+
+  .footerSocials img {
+    width: 25px;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 360px) {
+  .projectsMain {
+    border-radius: 20px;
+  }
+
+  .projectsTitle {
+    font-size: 22px;
+  }
+
+  .projectImage {
+    height: 140px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .footerLogo img {
+    width: 240px;
+  }
 }

@@ -1,14 +1,18 @@
+/* ProfilePage.module.css */
 body {
   background-color: #F5F5F5;
+  margin: 0;
+  padding: 0;
 }
 
 .header {
   background-color: #0E900E;
-  padding: 10px 126px;
+  padding: 10px 10%;
   color: #F5F5F5;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
 }
 
 .logo {
@@ -19,15 +23,34 @@ body {
   gap: 6px;
 }
 
+/* Бургер меню */
+.burgerMenu {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  padding: 5px;
+  z-index: 1001;
+}
+
+.burgerMenu span {
+  width: 25px;
+  height: 3px;
+  background-color: #F5F5F5;
+  margin: 3px 0;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+
 .navLinks {
   display: flex;
   align-items: center;
-  gap: 60px;
+  gap: 30px;
 }
 
 .navLinks a {
   color: #F5F5F5;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .buttonYellow {
@@ -39,17 +62,35 @@ body {
   padding: 6px 14px;
   cursor: pointer;
   font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Оверлей */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+/* Мобильное меню из футера */
+.mobileFooterMenu {
+  display: none;
 }
 
 .centerWrapper {
   background: #F5F5F5;
   display: flex;
-  justify-content: center; /* центр по горизонтали */
-  align-items: center; /* центр по вертикали */
-  min-height: 70vh; /* вертикальное центрирование */
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 70vh;
   width: 100%;
   border-radius: 20px 20px 0px 0px;
-  padding: 40px; /* добавлен padding */
+  padding: 40px;
   box-sizing: border-box;
   gap: 40px;
 }
@@ -58,7 +99,7 @@ body {
   flex: 2;
   background-color: #f5f5f5;
   border-radius: 20px;
-  padding: 30px 40px 30px 40px; /* равномерный padding со всех сторон */
+  padding: 30px 40px 30px 40px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
@@ -106,9 +147,6 @@ body {
 .infoDisplay p {
   font-family: "Geoform";
 }
-.infoDisplay p {
-  font-family: 'Geoform';
-}
 
 .editButton {
   margin-top: 20px;
@@ -131,7 +169,6 @@ h1{
   font-size: 26px;
   margin: 16px 0px;
 }
-
 
 .editForm input,
 .editForm textarea {
@@ -158,7 +195,7 @@ h1{
   border: none;
   font-weight: 700;
   cursor: pointer;
-    font-size: 16px;
+  font-size: 16px;
 }
 
 .saveButton {
@@ -177,9 +214,9 @@ h1{
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 30px 40px 30px 40px; /* синхронизированный padding с userInfo */
+  padding: 30px 40px 30px 40px;
   justify-content: flex-start;
-    font-size: 16px;
+  font-size: 16px;
 }
 
 .actionButton1 {
@@ -191,7 +228,7 @@ h1{
   border-radius: 16px;
   border: none;
   transition: background-color 0.2s ease;
-    font-size: 16px;
+  font-size: 16px;
 }
 
 .actionButton2 {
@@ -203,7 +240,7 @@ h1{
   border-radius: 16px;
   border: none;
   transition: background-color 0.2s ease;
-    font-size: 16px;
+  font-size: 16px;
 }
 
 .actionButton1:hover {
@@ -223,13 +260,12 @@ h1{
   border-radius: 16px;
   border: none;
   transition: background-color 0.2s ease;
-    font-size: 16px;
+  font-size: 16px;
 }
 
 .logoutButton:hover {
   background-color: #801f1f;
 }
-
 
 .tabsContainer {
   flex: 3;
@@ -266,17 +302,17 @@ h1{
 }
 
 .tabButton.active {
-  background-color: #0e900e; /* стандартный зеленый для проектов */
+  background-color: #0e900e;
   color: #f5f5f5;
 }
 
 .tabButton.active:nth-child(2) {
-  background-color: #fbbb13; /* желтый для кейсов */
+  background-color: #fbbb13;
   color: #0e900e;
 }
 
 .tabButton.active:nth-child(3) {
-  background-color: #A24B00; /* красный для отзывов */
+  background-color: #A24B00;
   color: #f5f5f5;
 }
 
@@ -300,16 +336,19 @@ h1{
   gap: 20px;
 }
 
-
 .projectCard {
   border-radius: 20px;
   overflow: hidden;
   transition: transform 0.2s ease;
   cursor: pointer;
+  box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.12);
+  height: 400px;
 }
+
 .projectCard a{
   text-decoration: none;
 }
+
 .projectCard:hover {
   transform: translateY(-5px);
 }
@@ -318,7 +357,7 @@ h1{
  width: 100%;
   height: 250px;
   object-fit: cover;
-    border-radius: 20px;
+  border-radius: 20px;
 }
 
 .projectInfo {
@@ -336,13 +375,13 @@ h1{
   font-size: 14px;
   color: #f5f5f5;
 }
+
 .projectsTitle {
   color: #f5f5f5;
   background-color: #0E900E;
   padding: 20px 20px 0px 20px;
   margin: 0px 20px;
 }
-
 
 .casesTab {
   font-family: 'Geoform';
@@ -360,7 +399,7 @@ h1{
 
 .casesGrid {
   font-weight: bold;
-    display: grid;
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
@@ -370,6 +409,8 @@ h1{
   overflow: hidden;
   transition: transform 0.2s ease;
   cursor: pointer;
+  box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.12);
+  height: 400px;
 }
 
 .caseCard a{
@@ -384,7 +425,7 @@ h1{
   width: 100%;
   height: 250px;
   object-fit: cover;
-    border-radius: 20px;
+  border-radius: 20px;
 }
 
 .caseInfo {
@@ -404,9 +445,6 @@ h1{
   font-size: 14px;
   color: #f5f5f5;
 }
-
-
-
 
 .reviewsTab {
   font-family: 'Geoform';
@@ -469,7 +507,7 @@ h1{
   font-size: 14px;
   border-radius: 12px;
   border: 1px solid #ccc;
-font-family: 'Geoform';
+  font-family: 'Geoform';
 }
 
 .reviewFormCustom button {
@@ -493,7 +531,6 @@ font-family: 'Geoform';
   gap: 5px;
   margin: 8px 0;
 }
-
 
 .processedCase{
   font-family: 'Geoform';
@@ -798,21 +835,7 @@ font-family: 'Geoform';
   font-size: 14px;
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-  .currentCasesGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .actionButtonsGroup {
-    flex-direction: column;
-  }
-  
-  .sectionTitle {
-    font-size: 24px;
-  }
-}
-
+/* Footer */
 .footer {
   background-color: #0E900E;
   color: #F5F5F5;
@@ -838,6 +861,12 @@ font-family: 'Geoform';
   color: #FBBB13;
 }
 
+.footerLogo img {
+  width: clamp(80px, 18vw, 220px);
+  height: auto;
+  max-width: 100%;
+}
+
 .footerContacts {
   font-size: 20px;
 }
@@ -860,4 +889,243 @@ font-family: 'Geoform';
 
 .footerSocials img {
   width: 30px;
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
+  .header {
+    padding: 30px 20px 10px 20px;
+  }
+
+  .burgerMenu {
+    display: flex;
+  }
+
+  .navLinks {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    background-color: #0E900E;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 80px 30px 30px;
+    gap: 25px;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  .navLinksActive {
+    right: 0;
+  }
+
+  .overlay {
+    display: block;
+  }
+
+  .mobileFooterMenu {
+    display: block;
+    margin-top: 30px;
+    width: 100%;
+    border-top: 1px solid #F5F5F5;
+    padding-top: 20px;
+  }
+
+  .centerWrapper {
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .userInfo {
+    padding: 20px;
+  }
+
+  .actionButtons {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Центрируем кнопки по горизонтали */
+    gap: 15px;
+  }
+
+  .actionButton1,
+  .actionButton2,
+  .logoutButton {
+    padding: 12px 16px;
+    font-size: 14px;
+    width: 100%; /* Занимают всю доступную ширину */
+    max-width: 280px; /* Максимальная ширина для удобства */
+    text-align: center; /* Центрируем текст */
+    justify-content: center; /* Центрируем содержимое */
+  }
+
+  .tabsContainer {
+    padding: 15px;
+  }
+
+  .tabs {
+    gap: 8px;
+  }
+
+  .tabButton {
+    margin: 0;
+    padding: 15px;
+    font-size: 18px;
+    border-radius: 12px;
+    text-align: center; /* Центрируем текст в табах */
+  }
+
+  .projectsTab,
+  .casesGrid,
+  .projectsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .projectCard,
+  .caseCard {
+    height: auto;
+  }
+
+  .currentCasesSection {
+    padding: 20px;
+    margin: 20px 0;
+  }
+
+  .sectionTitle {
+    font-size: 24px;
+    text-align: center; /* Центрируем заголовок */
+  }
+
+  .currentCasesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButtonsGroup {
+    flex-direction: column;
+  }
+
+  .footerContainer {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .footerLogo img {
+    width: clamp(70px, 22vw, 120px);
+  }
+
+  .footerContacts {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .centerWrapper {
+    padding: 15px;
+    align-items: center;
+  }
+
+  .userInfo {
+    padding: 15px;
+    text-align: center; /* Центрируем текст в информации пользователя */
+  }
+
+  .photoWrapper {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px auto; /* Центрируем фото */
+  }
+
+  h1 {
+    font-size: 22px;
+    text-align: center; /* Центрируем заголовок */
+  }
+
+  .actionButtons {
+    padding: 15px;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .actionButton1,
+  .actionButton2,
+  .logoutButton {
+    padding: 12px 16px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 260px;
+  }
+
+  .tabsContainer {
+    padding: 10px;
+  }
+  .tabs {
+    gap: 5px;
+    margin: 0 20px;
+  }
+
+  .tabButton {
+    padding: 10px 6px;
+    font-size: 12px;
+    border-radius: 12px 12px 0px 0px;
+    min-width: 70px;
+  }
+
+  .currentCasesSection {
+    padding: 15px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+
+  .footerContacts {
+    font-size: 14px;
+  }
+
+  .footerSocials {
+    justify-content: center; /* Центрируем соцсети */
+  }
+
+  .footerSocials img {
+    width: 25px;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 360px) {
+  .centerWrapper {
+    padding: 10px;
+  }
+
+  .userInfo {
+    padding: 12px;
+  }
+
+  .photoWrapper {
+    width: 100px;
+    height: 100px;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+
+  .actionButton1,
+  .actionButton2,
+  .logoutButton {
+    max-width: 240px; /* Еще меньше на очень маленьких экранах */
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .footerLogo img {
+    width: 240px;
+  }
 }

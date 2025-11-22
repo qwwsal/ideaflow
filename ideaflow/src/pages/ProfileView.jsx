@@ -8,7 +8,7 @@ export default function ProfileView() {
   const { userId: paramUserId } = useParams();
 
   const [userId, setUserId] = useState(paramUserId);
-  const [currentUserId, setCurrentUserId] = useState(null); // ID авторизованного пользователя
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [userEmail, setUserEmail] = useState('');
   const [activeTab, setActiveTab] = useState('projects');
   const [formData, setFormData] = useState({
@@ -18,7 +18,7 @@ export default function ProfileView() {
     username: '',
     about: '',
   });
-  const [currentUserData, setCurrentUserData] = useState({ // Данные авторизованного пользователя
+  const [currentUserData, setCurrentUserData] = useState({
     firstName: '',
     lastName: '',
     photo: '',
@@ -28,7 +28,6 @@ export default function ProfileView() {
   const [projectsAsCustomer, setProjectsAsCustomer] = useState([]);
   const [completedExecutorProjects, setCompletedExecutorProjects] = useState([]);
   const [inProcessExecutorCases, setInProcessExecutorCases] = useState([]);
-
   const [reviews, setReviews] = useState([]);
   const [newReviewText, setNewReviewText] = useState('');
   const [newReviewRating, setNewReviewRating] = useState(0);
@@ -37,8 +36,12 @@ export default function ProfileView() {
     text: '',
     rating: ''
   });
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Проверяем авторизацию при загрузке компонента
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   useEffect(() => {
     const checkAuth = () => {
       const storedUserId = localStorage.getItem('currentUserId');
@@ -52,7 +55,6 @@ export default function ProfileView() {
     checkAuth();
   }, [navigate]);
 
-  // Получаем данные текущего авторизованного пользователя
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
@@ -213,29 +215,25 @@ export default function ProfileView() {
   };
 
   const handleAddReview = async () => {
-    // Сбрасываем ошибки
     setValidationErrors({ text: '', rating: '' });
 
-    // Проверяем валидацию
     if (!validateReview()) {
       return;
     }
 
-    // Проверяем, что текущий пользователь авторизован
     if (!currentUserId) {
       alert('Необходимо авторизоваться для оставления отзыва');
       return;
     }
 
-    // ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: что пользователь не оставляет отзыв самому себе
     if (currentUserId === userId) {
       alert('Нельзя оставлять отзыв самому себе');
       return;
     }
 
     const newReview = {
-      userId, // ID пользователя, для которого оставляем отзыв
-      reviewerId: currentUserId, // ID авторизованного пользователя
+      userId,
+      reviewerId: currentUserId,
       reviewerName: `${currentUserData.firstName} ${currentUserData.lastName}`.trim() || 'Anonymous',
       reviewerPhoto: currentUserData.photo || '',
       text: newReviewText.trim(),
@@ -253,7 +251,6 @@ export default function ProfileView() {
       setNewReviewRating(0);
       const updatedReviews = await res.json();
       setReviews(updatedReviews);
-      // Сбрасываем ошибки после успешного добавления
       setValidationErrors({ text: '', rating: '' });
     } catch (err) {
       console.error('Ошибка добавления отзыва:', err);
@@ -268,7 +265,6 @@ export default function ProfileView() {
     return photoPath;
   };
 
-  // Функция для проверки, является ли профиль собственным
   const isOwnProfile = () => {
     return currentUserId && userId && currentUserId.toString() === userId.toString();
   };
@@ -379,7 +375,6 @@ export default function ProfileView() {
               )}
             </div>
             
-            {/* ФОРМА ОТЗЫВОВ - показываем только если это НЕ свой профиль и пользователь авторизован */}
             {currentUserId && !isOwnProfile() && (
               <div className={styles.reviewFormCustom}>
                 <h4>Оставить отзыв</h4>
@@ -389,7 +384,6 @@ export default function ProfileView() {
                   value={newReviewText}
                   onChange={(e) => {
                     setNewReviewText(e.target.value);
-                    // Сбрасываем ошибку при вводе текста
                     if (e.target.value.trim() !== '') {
                       setValidationErrors(prev => ({ ...prev, text: '' }));
                     }
@@ -412,7 +406,6 @@ export default function ProfileView() {
                           color={starValue <= (hoverRating || newReviewRating) ? '#ffbe5a' : '#ccc'}
                           onClick={() => {
                             setNewReviewRating(starValue);
-                            // Сбрасываем ошибку при выборе рейтинга
                             if (starValue > 0) {
                               setValidationErrors(prev => ({ ...prev, rating: '' }));
                             }
@@ -437,7 +430,6 @@ export default function ProfileView() {
               </div>
             )}
 
-            {/* СООБЩЕНИЕ ЕСЛИ ЭТО СВОЙ ПРОФИЛЬ */}
             {isOwnProfile() && (
               <div className={styles.infoMessage} style={{background: '#fff3cd', border: '1px solid #ffeaa7', padding: '15px', borderRadius: '5px', marginTop: '20px'}}>
                 <p style={{margin: '0 0 10px 0', color: '#856404', fontWeight: 'bold'}}> Вы просматриваете свой собственный профиль</p>
@@ -445,7 +437,6 @@ export default function ProfileView() {
               </div>
             )}
 
-            {/* СООБЩЕНИЕ ЕСЛИ НЕ АВТОРИЗОВАН */}
             {!currentUserId && (
               <div className={styles.infoMessage} style={{background: '#d1ecf1', border: '1px solid #bee5eb', padding: '15px', borderRadius: '5px', marginTop: '20px'}}>
                 <p style={{margin: '0', color: '#0c5460'}}>🔐 Чтобы оставить отзыв, необходимо <Link to="/signin" style={{color: '#007bff', textDecoration: 'underline'}}>войти в систему</Link>.</p>
@@ -467,7 +458,17 @@ export default function ProfileView() {
         <Link to="/">
           <img src="/images/logosmall.svg" alt="IdeaFlow logo" style={{ height: 80 }} />
         </Link>
-        <nav className={styles.navLinks}>
+        
+        <button 
+          className={`${styles.burgerMenu} ${isMenuOpen ? styles.burgerMenuActive : ''}`} 
+          onClick={toggleMenu}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav className={`${styles.navLinks} ${isMenuOpen ? styles.navLinksActive : ''}`}>
           <Link to="/profile">Профиль</Link>
           <Link to="/cases">Кейсы</Link>
           <Link to="/projects">Проекты</Link>
@@ -477,7 +478,23 @@ export default function ProfileView() {
           <Link to="/cases">
             <button className={styles.buttonYellow}>Приступить к проекту</button>
           </Link>
+          
+          <div className={styles.mobileFooterMenu}>
+            <div className={styles.footerContacts}>
+              Связаться с нами <br />
+              <a href="mailto:support@ideaflow.com">support@ideaflow.com</a>
+              <br />
+              <p>+7 (123) 456-78-90</p>
+            </div>
+            <div className={styles.footerSocials}>
+              <a href="#"><img src="/images/facebook.svg" alt="Facebook" /></a>
+              <a href="#"><img src="/images/twitterx.svg" alt="Twitter" /></a>
+              <a href="#"><img src="/images/instagram.svg" alt="Instagram" /></a>
+            </div>
+          </div>
         </nav>
+
+        {isMenuOpen && <div className={styles.overlay} onClick={toggleMenu}></div>}
       </header>
 
       <div className={styles.userInfo}>
