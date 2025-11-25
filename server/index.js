@@ -7,7 +7,7 @@ const fs = require('fs');
 const db = require('./database');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Логирование запросов
 app.use((req, res, next) => {
@@ -15,13 +15,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Создаем папку uploads, если нет
-const uploadsDir = path.join(__dirname, 'uploads');
+// Для Vercel: создаем папку uploads в /tmp (единственное доступное место для записи)
+const uploadsDir = path.join('/tmp', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
+  fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 app.use(cors());
+app.use(express.json());
 
 // Раздача статики из uploads
 app.use('/uploads', express.static(uploadsDir, {
@@ -30,8 +31,7 @@ app.use('/uploads', express.static(uploadsDir, {
   }
 }));
 
-
-// Настройка multer для файлов
+// Настройка multer для файлов (сохраняем в /tmp)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
@@ -41,14 +41,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Парсинг JSON тела
-app.use(express.json());
-
 // Middleware для получения текущего пользователя (упрощенная версия)
-// В реальном приложении здесь должна быть проверка JWT токена или сессии
 const getCurrentUser = (req, res, next) => {
-  // Временное решение - предполагаем, что текущий пользователь передается в заголовках
-  // В реальном приложении используйте аутентификацию через JWT
   const userId = req.headers['x-user-id'] || req.query.currentUserId;
   
   if (!userId) {
@@ -65,7 +59,7 @@ const getCurrentUser = (req, res, next) => {
 };
 
 // Регистрация
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
     return res.status(400).json({ error: 'Email и пароль обязательны' });
@@ -81,7 +75,7 @@ app.post('/register', async (req, res) => {
 });
 
 // Вход
-app.post('/login', (req, res) => {
+app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
   db.get('SELECT * FROM Users WHERE email = ?', [email], async (err, user) => {
     if (err) return res.status(500).json({ error: 'Ошибка сервера' });
@@ -99,12 +93,12 @@ app.post('/login', (req, res) => {
 });
 
 // Получение данных текущего пользователя
-app.get('/current-user', getCurrentUser, (req, res) => {
+app.get('/api/current-user', getCurrentUser, (req, res) => {
   res.json(req.currentUser);
 });
 
 // Профиль
-app.get('/profile/:id', (req, res) => {
+app.get('/api/profile/:id', (req, res) => {
   const id = req.params.id;
   db.get('SELECT id, email, firstName, lastName, photo, description FROM Users WHERE id = ?', [id], (err, user) => {
     if (err) return res.status(500).json({ error: 'Ошибка сервера' });
@@ -113,7 +107,7 @@ app.get('/profile/:id', (req, res) => {
   });
 });
 
-app.put('/profile/:id', (req, res) => {
+app.put('/api/profile/:id', (req, res) => {
   const id = req.params.id;
   const { firstName, lastName, photo, description } = req.body;
   db.run(
@@ -129,7 +123,7 @@ app.put('/profile/:id', (req, res) => {
 // Создание кейса
 const uploadCaseFiles = upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'files', maxCount: 15 }]);
 
-app.post('/cases', (req, res, next) => {
+app.post('/api/cases', (req, res, next) => {
   uploadCaseFiles(req, res, (err) => {
     if (err) {
       console.error('Ошибка Multer:', err);
@@ -164,9 +158,8 @@ app.post('/cases', (req, res, next) => {
   });
 });
 
-
 // Получение кейсов с фильтрацией
-app.get('/cases', (req, res) => {
+app.get('/api/cases', (req, res) => {
   const userId = req.query.userId;
   let sql = `SELECT Cases.*, Users.email as userEmail FROM Cases LEFT JOIN Users ON Cases.userId = Users.id`;
   const params = [];
@@ -182,7 +175,7 @@ app.get('/cases', (req, res) => {
 });
 
 // Детали кейса
-app.get('/cases/:id', (req, res) => {
+app.get('/api/cases/:id', (req, res) => {
   const id = req.params.id;
   const sql = `SELECT Cases.*, Users.email as userEmail FROM Cases LEFT JOIN Users ON Cases.userId = Users.id WHERE Cases.id = ?`;
   db.get(sql, [id], (err, row) => {
@@ -197,7 +190,7 @@ app.get('/cases/:id', (req, res) => {
 });
 
 // Принять кейс (перенос в ProcessedCases)
-app.put('/cases/:id/accept', async (req, res) => {
+app.put('/api/cases/:id/accept', async (req, res) => {
   const caseId = Number(req.params.id);
   const { executorId } = req.body;
   if (!executorId || isNaN(caseId)) {
@@ -232,7 +225,7 @@ app.put('/cases/:id/accept', async (req, res) => {
 });
 
 // Получение принятых кейсов
-app.get('/processed-cases', (req, res) => {
+app.get('/api/processed-cases', (req, res) => {
   let sql = `SELECT ProcessedCases.*, Users.email AS userEmail FROM ProcessedCases LEFT JOIN Users ON ProcessedCases.userId = Users.id`;
   db.all(sql, [], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Ошибка при получении принятых кейсов' });
@@ -242,7 +235,7 @@ app.get('/processed-cases', (req, res) => {
 });
 
 // Детали принятого кейса
-app.get('/processed-cases/:id', (req, res) => {
+app.get('/api/processed-cases/:id', (req, res) => {
   const id = req.params.id;
   const sql = `SELECT ProcessedCases.*, Users.email AS userEmail FROM ProcessedCases LEFT JOIN Users ON ProcessedCases.userId = Users.id WHERE ProcessedCases.id = ?`;
   db.get(sql, [id], (err, row) => {
@@ -254,14 +247,14 @@ app.get('/processed-cases/:id', (req, res) => {
 });
 
 // Загрузка фото профиля
-app.post('/upload-photo', upload.single('photo'), (req, res) => {
+app.post('/api/upload-photo', upload.single('photo'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Файл не выбран' });
   res.json({ photoPath: `/uploads/${req.file.filename}` });
 });
 
 // Загрузка файлов для принятых кейсов
 const uploadExtraFiles = upload.array('extraFiles', 15);
-app.post('/processed-cases/:id/upload-files', uploadExtraFiles, (req, res) => {
+app.post('/api/processed-cases/:id/upload-files', uploadExtraFiles, (req, res) => {
   const id = req.params.id;
   if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'Файлы не выбраны' });
 
@@ -280,7 +273,7 @@ app.post('/processed-cases/:id/upload-files', uploadExtraFiles, (req, res) => {
 });
 
 // Завершение принятого кейса, создание проекта и удаление из ProcessedCases
-app.put('/processed-cases/:id/complete', (req, res) => {
+app.put('/api/processed-cases/:id/complete', (req, res) => {
   const processedCaseId = Number(req.params.id);
   const { userId, title, theme, description, cover, files } = req.body;
 
@@ -320,7 +313,7 @@ app.put('/processed-cases/:id/complete', (req, res) => {
 });
 
 // Получение проектов
-app.get('/projects', (req, res) => {
+app.get('/api/projects', (req, res) => {
   const userId = req.query.userId;
   const userEmail = req.query.userEmail;
   
@@ -357,7 +350,7 @@ app.get('/projects', (req, res) => {
 });
 
 // Получение деталей проекта
-app.get('/projects/:id', (req, res) => {
+app.get('/api/projects/:id', (req, res) => {
   const id = req.params.id;
   const sql = `SELECT Projects.*, Users.email as userEmail FROM Projects LEFT JOIN Users ON Projects.userId = Users.id WHERE Projects.id = ?`;
   db.get(sql, [id], (err, row) => {
@@ -372,7 +365,7 @@ app.get('/projects/:id', (req, res) => {
 });
 
 // Получить отзывы пользователя
-app.get('/reviews', (req, res) => {
+app.get('/api/reviews', (req, res) => {
   const userId = req.query.userId;
   let sql = 'SELECT * FROM Reviews';
   const params = [];
@@ -387,7 +380,7 @@ app.get('/reviews', (req, res) => {
 });
 
 // Добавить новый отзыв (обновленная версия с reviewerId)
-app.post('/reviews', (req, res) => {
+app.post('/api/reviews', (req, res) => {
   const { userId, reviewerId, reviewerName, reviewerPhoto, text, rating } = req.body;
   if (!userId || !text || !rating || !reviewerId)
     return res.status(400).json({ error: 'Не все обязательные поля заполнены' });
@@ -403,7 +396,15 @@ app.post('/reviews', (req, res) => {
   });
 });
 
-app.get('/', (req, res) => {
+// Статические файлы React приложения
+app.use(express.static(path.join(__dirname, '../client/build')));
+
+// Все остальные запросы отправляем на React приложение
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+});
+
+app.get('/api', (req, res) => {
   res.send('Welcome to the API');
 });
 
@@ -413,6 +414,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Внутренняя ошибка сервера' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server started on http://localhost:${PORT}`);
-});
+// Для локальной разработки
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server started on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

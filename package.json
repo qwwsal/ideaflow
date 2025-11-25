@@ -4,17 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "cd server && node index.js",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm install && npm run build",
+    "build:server": "cd server && npm install",
+    "start": "cd server && node index.js",
+    "vercel-build": "npm run build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.2",
-    "sqlite3": "^5.1.7"
+  "engines": {
+    "node": ">=18.x"
   }
 }
